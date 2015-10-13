@@ -28,19 +28,19 @@
                 renderer.setClearColor(0xdddddd);
                 document.body.appendChild( renderer.domElement );
             
-                var geometry = new THREE.BoxGeometry( 10, 20, 10 );
-                var material = new THREE.MeshLambertMaterial( {color: 0x00ff00} );
-                var cube = new THREE.Mesh( geometry, material );
-                cube.position.x= threeObjects[0].geometry.vertices[0].x;
-                cube.position.y= threeObjects[0].geometry.vertices[0].y;
-                cube.position.z=-100;
-                scene.add( cube );
+                //var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                //var material = new THREE.MeshLambertMaterial( {color: 0x00ff00} );
+                //var cube = new THREE.Mesh( geometry, material );
+                //cube.position.x= threeObjects[threeObjects.lenght/2].geometry.vertices[0].x;
+                //cube.position.y= threeObjects[threeObjects.lenght/2].geometry.vertices[0].y;
+                //cube.position.z=0;
+                //scene.add( cube );
 
-                camera.position.z = 50;
-                camera.position.x = threeObjects[0].geometry.vertices[0].x-800;
-                camera.position.y = threeObjects[0].geometry.vertices[0].y;
+                camera.position.z = 200;
+                camera.position.x = 200;//threeObjects[threeObjects.length/2].geometry.vertices[0].x;
+                camera.position.y = 100;//threeObjects[threeObjects.length/2].geometry.vertices[0].z;
                 //camera.lookAt(threeObjects[0].position);
-                camera.lookAt(cube.position);
+                camera.lookAt(threeObjects[threeObjects.length/2].position);
             
             
                 // add spotlight for the shadows
@@ -73,19 +73,6 @@
 
 			var render = function () {
 				requestAnimationFrame( render );
-
-                /*for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
-					geometry.vertices[ i ].y = 35 * Math.sin( i / 5 + ( time + i ) / 7 );
-				}*/
-
-               /* cube.scale.y +=0.003;
-                cube.material.color.r +=0.001;
-                cube.material.color.g +=0.003;
-                cube.material.color.b +=0.01;*/
-                
-				//cube.rotation.x += 0.1;
-				//cube.rotation.y += 0.1;
-
 				renderer.render(scene, camera);
 			};
 			
@@ -100,6 +87,8 @@
 			function populateMap(){
                 jQuery.getJSON('data/testdata.json', function(data) {
                     var converter = new UtmConverter();
+                    var minX=0;
+                    var minY=0;
                     
                     $.each(data.features,function(i, item){
                         var rectShape = new THREE.Shape();
@@ -107,22 +96,28 @@
                         
                         $.each(item.geometry.coordinates, function(j, itemTwo){
                             var utmResult= converter.toUtm({coord: [itemTwo[0], itemTwo[1]]});
+                            
+                            //Calculate bounding box
+                            if(minX==0 || utmResult.coord.x<minX)
+                                minX=utmResult.coord.x;
+                            if(minY==0 || utmResult.coord.y<minY)
+                                minY=utmResult.coord.y;
+                            
                             if (j==0){
                                 height=itemTwo[2];
                                 rectShape.moveTo(utmResult.coord.x, utmResult.coord.y);
                             }else{
-                                rectShape.lineTo(utmResult.coord.x, utmResult.coord.y);
+                                rectShape.lineTo(utmResult.coord.x, utmResult.coord.y); 
                             }
                         });
 
                         var geometry = new THREE.ExtrudeGeometry(rectShape, { amount: height, bevelEnabled: true, bevelSegments: 1, steps: 1, bevelSize: 0.1, bevelThickness: 0.1 });
        
-                        //Calculate bounding box             
-
+                        //Converting the 2D mapping to 3D mapping (shifting z and y coordinates)         
                         for( var i = 0; i < geometry.vertices.length; i++ ) {
                             var fZ =  geometry.vertices[i].z;
-                            geometry.vertices[i].x -= 582300; 
-                            geometry.vertices[i].z = geometry.vertices[i].y-6233000;
+                            geometry.vertices[i].x -= minX; 
+                            geometry.vertices[i].z = geometry.vertices[i].y-minY;
                             geometry.vertices[i].y = fZ;
                             //console.log(geometry.vertices[i]);
                         }
