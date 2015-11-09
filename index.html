@@ -26,6 +26,7 @@
                 renderer = new THREE.WebGLRenderer();
                 renderer.setSize( window.innerWidth, window.innerHeight );
                 renderer.setClearColor(0xdddddd);
+              //  renderer.setFaceCulling(false);
                 document.body.appendChild( renderer.domElement );
             
                 //var geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -119,8 +120,20 @@
                             geometry.vertices[i].x -= minX; 
                             geometry.vertices[i].z = geometry.vertices[i].y-minY;
                             geometry.vertices[i].y = fZ;
-                            //console.log(geometry.vertices[i]);
+                           // console.log(geometry.vertices[i]);
                         }
+                        
+                        
+                        
+                         /*for( var i = 0; i < geometry.vertices.length-3;) 
+                         {
+                            var temp = geometry.vertices[i+0];
+                            geometry.vertices[i+0]=geometry.vertices[i+2];
+                            geometry.vertices[i+2]=temp;
+                            i += 3;
+                        }*/
+                        
+                        
                         
                         var material = new THREE.MeshLambertMaterial({color: 0x777777});
                         var rectMesh = new THREE.Mesh(geometry, material) ;		
